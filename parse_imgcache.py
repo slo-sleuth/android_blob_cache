@@ -4,10 +4,10 @@ import argparse
 import re
 import sqlite3
 import sys
-from io import BytesIO
 from struct import unpack
-from typing import ItemsView
 
+# groups 1, 2 in the follow expression are optional because there are instances
+# when the original file path is not present in the record
 meta_re = re.compile('(.+?)\+(\d)?\+(.+)?\+(\d{10})\+?(.+){0,}')
 
 def detect_codec(data: bytes, codecs: tuple=(('utf-32-le', 4), 
@@ -118,14 +118,14 @@ def main():
             decoded_meta = metadata.decode(codec, 'ignore')
             try:
                 meta_list = meta_re.findall(decoded_meta)[0]
-                if len(meta_list) <= 3:
+                if len(meta_list) <= 3:  # In some instances, the file path is not present
                     meta_list.insert(1, None)
                     meta_list.inster(2, None)
             except IndexError as e:
                 print(f'Metadata in record at Offset: {offset} not understood, adding RawData only')
                 meta_list = [None] * 5
 
-            if args.db:
+            if args.db:  # Default for now, but CSV will be a future option
                 apath, unk, fpath, ts, xtra = meta_list
                 if not xtra:
                     xtra = None
