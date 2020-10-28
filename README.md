@@ -46,14 +46,14 @@ Cached thumbnails are stored in a structured data format:
 
 The records are contiguous with no separators between them.
 
-Record offset|Length|Type|Description
----|---|---|---|--- 
-0|4|Unk|Unknown
-4|4|Unk|Unknown
-8|4|Unk|Unknown
-12|4|Unk|Unknown
-16|4|uint32|Size of metadata + thumbnail
-20|varies|binary|metadata and thumbnail
+|Record offset|Length|Type|Description
+|---|---|---|---
+|0|4|Unk|Unknown
+|4|4|Unk|Unknown
+|8|4|Unk|Unknown
+|12|4|Unk|Unknown
+|16|4|uint32|Size of metadata + thumbnail
+|20|varies|binary|metadata and thumbnail
 
 The record metadata is plus sign ("+") delimited and encoded in UTF-16-LE or UTF-32-LE.  The UTF-32 encoding can end in a UTF-16-LE string (more that to come).  
 
@@ -61,13 +61,13 @@ The record metadata is plus sign ("+") delimited and encoded in UTF-16-LE or UTF
 
 The structure of the record metadata if fairly consistent, but variations have been observed.
 
-Position|Type|Description
----|---|---
-0|string|The Gallery application path
-1|integer|Unknown purpose
-2|string|The original file path
-3|integer|Unixepoch time stamp
-4|string|Variably occuring field, observed to contain Google user name in encrypted media files
+|Position|Type|Description
+|---|---|---
+|0|string|The Gallery application internal path
+|1|integer|Unknown purpose
+|2|string|The original file path
+|3|integer|Unixepoch time stamp, original image modification date.
+|4|string|Variably occuring field, observed to contain Google user name in encrypted media files
 
 UTF-32-LE encoded metadata was observed to have a plus sign delimited, UTF-16-LE encoded string appended to the metadata.  The string was consistently `kar`.  The purpose of the string is not known.
 
