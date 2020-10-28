@@ -8,7 +8,7 @@ from io import BytesIO
 from struct import unpack
 from typing import ItemsView
 
-meta_re = re.compile('(.+?)\+(\d)\+(.+)\+(\d{10})\+?(.+){0,}')
+meta_re = re.compile('(.+?)\+(\d)?\+(.+)?\+(\d{10})\+?(.+){0,}')
 
 def detect_codec(data: bytes, codecs: tuple=(('utf-32-le', 4), 
     ('utf-16-le', 2))) -> tuple:
@@ -118,6 +118,9 @@ def main():
             decoded_meta = metadata.decode(codec, 'ignore')
             try:
                 meta_list = meta_re.findall(decoded_meta)[0]
+                if len(meta_list) <= 3:
+                    meta_list.insert(1, None)
+                    meta_list.inster(2, None)
             except IndexError as e:
                 print(f'Metadata in record at Offset: {offset} not understood, adding RawData only')
                 meta_list = [None] * 5
