@@ -8,22 +8,24 @@ from struct import unpack
 
 # groups 1, 2 in the follow expression are optional because there are instances
 # when the original file path is not present in the record
-meta_re = re.compile('(.+?)\+(\d)?\+?(.+?\.\w{3,4})?\+?(\d{10})\+?(.+){0,}')
+meta_re = re.compile('(.+?)\\+(\\d)?\\+?(.+?\\.\\w{3,4})?\\+?(\\d{10})\\+?(.+)*')
 
-def detect_codec(data: bytes, codecs: tuple=(('utf-32-le', 4), 
-    ('utf-16-le', 2))) -> tuple:
+
+def detect_codec(data: bytes, codecs: tuple = (('utf-32-le', 4),
+                                               ('utf-16-le', 2))) -> tuple:
     """Attempt to detect codec of data.  Returns codec string and corresponding 
     code point length."""
-    
+
     for values in codecs:
         codec, cp_len = values
         try:
             data.decode(codec)
             return codec, cp_len
-        except:
+        except UnicodeDecodeError:
             pass
     print(f'Codec detection error: {data}')
     sys.exit(1)
+
 
 def construct_db(db: str):
     """Build empty database 'db'."""
@@ -60,8 +62,8 @@ def construct_db(db: str):
     con.commit()
     return con
 
-def main():
 
+def main():
     parser = argparse.ArgumentParser(description='Extract thumbnails and file \
         metadata from Android imgcache file.', epilog='Writes output to a \
         SQLite database named after the cache file and to the same directory. \
@@ -69,7 +71,7 @@ def main():
         CSV.')
     parser.add_argument('FILE', help="imgcache file to parse")
     parser.add_argument('-db', "-database", action='store_true', default=True,
-        help='Write to SQLite database (default)')
+                        help='Write to SQLite database (default)')
 
     args = parser.parse_args()
 
@@ -83,7 +85,7 @@ def main():
         # Determine file size to gracefully exit loop
         fsize = f.seek(0, 2)
         f.seek(0)
-        
+
         # Read file header, quit if wrong file type provided
         file_header = f.read(4)
         if not file_header == b'\x10\x85\x24\xBD':
@@ -92,7 +94,6 @@ def main():
 
         # Read each record, structured as 20 byte header, variable length string
         # with fields separated by '+', followed by thumbnail image.
-        offset = 0
         while True:
             offset = f.tell()
 
@@ -103,7 +104,7 @@ def main():
             # Read 20 byte record header, last 4 bytes are the file metadata + 
             # thumbnail size
             rec_header = unpack('<5I', f.read(20))
-            
+
             # Split metadata from thumbnail data using thumbnail header.  
             # Metadata is variable length and has no size indicator.
             thumbnail_header = b'\xff\xd8\xff\xe0'
@@ -118,7 +119,7 @@ def main():
             decoded_meta = metadata.decode(codec, 'ignore')
             try:
                 meta_list = meta_re.findall(decoded_meta)[0]
-            except IndexError as e:
+            except IndexError:
                 print(f'Metadata in record at Offset: {offset} not understood, adding RawData only')
                 meta_list = [None] * 5
 
@@ -127,8 +128,8 @@ def main():
                 if not xtra:
                     xtra = None
                 c.execute('''INSERT INTO meta (Offset, AppPath, Unk, FilePath,
-                    TimeStamp, Extra, RawMeta) VALUES (?,?,?,?,?,?,?);''', 
-                    (offset, apath, unk, fpath, ts, xtra, metadata))
+                    TimeStamp, Extra, RawMeta) VALUES (?,?,?,?,?,?,?);''',
+                          (offset, apath, unk, fpath, ts, xtra, metadata))
                 c.execute('''INSERT INTO thumbnails (Offset, Thumbnail) VALUES 
                     (?,?);''', (offset, thumbnail))
 
@@ -136,6 +137,7 @@ def main():
                 print(offset, meta_list, thumbnail[:4])
         if args.db:
             db.commit()
+
 
 if __name__ == "__main__":
     main()
