@@ -9,7 +9,7 @@ from struct import unpack
 # groups 1, 2 in the following expression are optional because there are 
 # instances when the original file path is not present in the record
 meta_re = re.compile('(.+?)\\+(\\d\\+)?(.+?\\.\\w{3,4})?\\+?(\\d+)\\+?(.+)*')
-jpeg_header = b'\xff\xd8\xff\xe0'
+jpeg_header = b'\xff\xd8\xff'
 
 def detect_codec(data: bytes, codecs: tuple = (('utf-32-le', 4),
                                                ('utf-16-le', 2))) -> tuple:

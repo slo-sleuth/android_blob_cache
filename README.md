@@ -1,7 +1,7 @@
 # Android Imgcache Files
 
-__*Based on the analysis of Android 9 imgcache files found in the Android
-Gallery application*__
+***Based on the analysis of Android 9 imgcache files found in the Android
+Gallery application***
 
 ## Contents
 - [Android Imgcache Files](#android-imgcache-files)
@@ -33,9 +33,9 @@ The file has a 4-byte signature, but no footer.
 
 ### File Header
 
-|File Offset|Size|Value
-|---|---|---
-|0|4 bytes|0x108524BD
+| File Offset | Size    | Value      |
+| ----------- | ------- | ---------- |
+| 0           | 4 bytes | 0x108524BD |
 
 ### File Records
 
@@ -48,14 +48,14 @@ Cached thumbnails are stored in a structured data format:
 
 The records are contiguous with no buffers.
 
-|Record offset|Length|Type|Description
-|---|---|---|---
-|0|4|Unk|Unknown
-|4|4|Unk|Unknown
-|8|4|Unk|Unknown
-|12|4|uint32|File offset of current record
-|16|4|uint32|Size of payload
-|20|varies|binary|Payload
+| Record offset | Length | Type   | Description                   |
+| ------------- | ------ | ------ | ----------------------------- |
+| 0             | 4      | Unk    | Unknown                       |
+| 4             | 4      | Unk    | Unknown                       |
+| 8             | 4      | Unk    | Unknown                       |
+| 12            | 4      | uint32 | File offset of current record |
+| 16            | 4      | uint32 | Size of payload               |
+| 20            | varies | binary | Payload                       |
 
 Thus, the next record offset can be calculated by:
 - current record offset + record header length (20) + payload length
@@ -64,22 +64,20 @@ The record metadata is plus sign ("+") delimited and encoded in UTF-16-LE or
 UTF-32-LE.  The UTF-32 encoding can end in a UTF-16-LE string (more that to
 come).  
 
-|**WARNING:** 
-|---
-|*There is no size flag to indicate the length of the metadata, and separating
-the fields using the fields blindly using the "+" separator is dangerous:
-Android file paths can and do include the plus sign.*
+> **WARNING:** There is no size flag to indicate the length of the metadata,
+> and separating the fields using the fields blindly using the "+" separator is
+> dangerous: Android file paths can and do include the plus sign.
 
 The structure of the record metadata is fairly consistent, but variations have
 been observed.
 
-|Position|Type|Description
-|---|---|---
-|0|string|The Gallery application internal path
-|1|integer|Unknown purpose (not always present)
-|2|string|The original file path (not always present)
-|3|integer|Unixepoch time stamp, original image modification date.
-|4|string|Variably occurring field, observed to contain Google user name in encrypted media files
+| Position | Type    | Description                                                                             |
+| -------- | ------- | --------------------------------------------------------------------------------------- |
+| 0        | string  | The Gallery application internal path                                                   |
+| 1        | integer | Unknown purpose (not always present)                                                    |
+| 2        | string  | The original file path (not always present)                                             |
+| 3        | integer | Unixepoch time stamp, original image modification date.                                 |
+| 4        | string  | Variably occurring field, observed to contain Google user name in encrypted media files |
 
 NOTE: UTF-32-LE encoded metadata was observed to have a plus sign delimited,
 UTF-16-LE encoded string appended to the metadata.  The string was consistently
