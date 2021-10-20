@@ -64,9 +64,9 @@ The record metadata is plus sign ("+") delimited and encoded in UTF-16-LE or
 UTF-32-LE.  The UTF-32 encoding can end in a UTF-16-LE string (more that to
 come).  
 
-> **WARNING:** There is no size flag to indicate the length of the metadata,
-> and separating the fields using the fields blindly using the "+" separator is
-> dangerous: Android file paths can and do include the plus sign.
+> **WARNING:** There is no size flag to indicate the length of the metadata, and
+> separating the fields blindly using the "+" separator is dangerous: Android
+> file paths can and do include the plus sign.
 
 The structure of the record metadata is fairly consistent, but variations have
 been observed.
