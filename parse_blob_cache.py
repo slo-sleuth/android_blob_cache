@@ -47,23 +47,29 @@ def construct_db(db: str):
 
     CREATE TABLE blob_header (
         Offset INTEGER PRIMARY KEY,
-        Key INTEGER,
+        Key BLOB,
         Checksum INTEGER,
         BlobOffset INTEGER,
         BlobLength INTEGER,
         RawBlobHeader BLOB
     );
 
-    CREATE VIEW Parsed_Blob_Cache as
-        select
-            blob.offset as RecordOffset,
-            datetime(TimeStamp, 'unixepoch') as UTC,
-            datetime(TimeStamp, 'unixepoch', 'localtime') as LocalTime,
+    CREATE VIEW Parsed_Blob_Cache AS
+        SELECT
+            blob.offset AS RecordOffset,
+            CASE 
+                WHEN length(TimeStamp) == 13 THEN datetime(TimeStamp/1000, 'unixepoch')
+                ELSE datetime(TimeStamp, 'unixepoch')
+            END as UTC,
+            CASE 
+                WHEN length(TimeStamp) == 13 THEN datetime(TimeStamp/1000, 'unixepoch', 'localtime')
+                ELSE datetime(TimeStamp, 'unixepoch', 'localtime') 
+            END as LocalTime,
             OriginalFilePath,
             Extra,
             InternalPath,
             Thumbnail
-        from blob;
+        FROM blob;
     ''')
     con.commit()
     return con

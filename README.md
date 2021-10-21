@@ -165,7 +165,7 @@ to a directory and create a CSV.
 ### Database Schema
 
 ```sql
-CREATE TABLE payload (
+CREATE TABLE blob (
     Offset INTEGER PRIMARY KEY,
     InternalPath TEXT,
     Unk INTEGER,
@@ -176,24 +176,29 @@ CREATE TABLE payload (
     RawMetadata BLOB
 );
 
-CREATE TABLE record_header (
+CREATE TABLE blob_header (
     Offset INTEGER PRIMARY KEY,
-    val1 INTEGER,
-    val2 INTEGER,
-    val3 INTEGER,
-    RecordOffset INTEGER,
-    PayloadLength INTEGER,
-    RawRecordHeader BLOB
+    Key BLOB,
+    Checksum INTEGER,
+    BlobOffset INTEGER,
+    BlobLength INTEGER,
+    RawBlobHeader BLOB
 );
 
-CREATE VIEW Parsed_Records as
-    select
-        payload.offset as RecordOffset,
-        datetime(TimeStamp, 'unixepoch') as UTC,
-        datetime(TimeStamp, 'unixepoch', 'localtime') as LocalTime,
+CREATE VIEW Parsed_Blob_Cache AS
+    SELECT
+        blob.offset AS RecordOffset,
+        CASE 
+            WHEN length(TimeStamp) == 13 THEN datetime(TimeStamp/1000, 'unixepoch')
+            ELSE datetime(TimeStamp, 'unixepoch')
+        END as UTC,
+        CASE 
+            WHEN length(TimeStamp) == 13 THEN datetime(TimeStamp/1000, 'unixepoch', 'localtime')
+            ELSE datetime(TimeStamp, 'unixepoch', 'localtime') 
+        END as LocalTime,
         OriginalFilePath,
         Extra,
         InternalPath,
         Thumbnail
-    from payload;
+    FROM blob;
 ```
